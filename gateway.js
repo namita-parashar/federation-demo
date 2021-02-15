@@ -1,5 +1,5 @@
 const { ApolloServer } = require("apollo-server");
-const { ApolloGateway } = require("@apollo/gateway");
+const { ApolloGateway,RemoteGraphQLDataSource } = require("@apollo/gateway");
 
 const gateway = new ApolloGateway({
   // This entire `serviceList` is optional when running in managed federation
@@ -8,14 +8,19 @@ const gateway = new ApolloGateway({
   // prevents composition failures at runtime using schema validation using
   // real usage-based metrics.
   serviceList: [
-    { name: "accounts", url: "http://localhost:4001/graphql" },
-    { name: "reviews", url: "http://localhost:4002/graphql" },
-    { name: "products", url: "http://localhost:4003/graphql" },
-    { name: "inventory", url: "http://localhost:4004/graphql" }
+    { name: "domains", url: "http://localhost:4001/graphql" },
   ],
 
   // Experimental: Enabling this enables the query plan view in Playground.
   __exposeQueryPlanExperimental: false,
+  buildService({ url }) {
+    return new RemoteGraphQLDataSource({
+      url,
+      willSendRequest({ request, context }) {
+        request.http.headers.set( "x-auth",context.token );
+      }
+    });
+  }
 });
 
 (async () => {
@@ -29,6 +34,11 @@ const gateway = new ApolloGateway({
 
     // Subscriptions are unsupported but planned for a future Gateway version.
     subscriptions: false,
+    context: ({ req }) => {
+      return {
+        "token": req.headers['x-auth'],
+      };
+    },formatError: (err) => ({ message: err.message, status: err.status }),
   });
 
   server.listen().then(({ url }) => {

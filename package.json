@@ -18,6 +18,8 @@
   "dependencies": {
     "@apollo/gateway": "latest",
     "apollo-server": "latest",
+    "apollo-server-express": "^2.14.3",
+    "dotenv": "^8.2.0",
     "graphql": "latest"
   }
 }

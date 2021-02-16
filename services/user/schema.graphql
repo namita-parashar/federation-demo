@@ -1,0 +1,102 @@
+extend type Query {
+    user: User
+    domain:domain
+    registrar:[registrar]
+    domain_availability(account:ID,domain:String):availableDomain
+    nameserver(domain:Int):[nameserver]
+    tlds(offset: Int, limit: Int):[tlddata]
+  }
+  extend type Mutation{
+    createRegistrar(name:String, url: String, type:Int):registrar
+    createAccount(email:String,api_key:String,api_user:String,username:String,registrar_id:Int,notes:String):account
+    updateAccount(account:ID,email:String,api_key:String,api_user:String,username:String,registrar_id:Int,notes:String):account
+    deleteAccount(account:ID):String,
+    createDomain(account_id:Int,address_id:Int,name:String,whoisguard:Int,notes:String):buydomain
+    updateDomain(domain:Int,notes:String):buydomain
+    createAddress(account:Int, name:String, email:String,firstname:String, lastname: String, job_title:String,organization:String, address1:String, address2:String,city:String, phone:String, fax:String,state:String, zipcode:String, country:String):Address
+    createNameServer(domain:Int, nameserver: String):nameserver
+    createTld(account:Int):[tlddatacreate]
+  }
+  type tlddata @key(fields: "id"){
+    id:Int
+    tld:String
+  }
+  type tlddatacreate @key(fields: "name"){ 
+    name:String
+  }
+  type nameserver @key(fields: "id"){
+    id:Int
+    nameserver1:String
+    nameserver2:String
+  }
+  type Address @key(fields: "id"){ 
+    id:Int
+    email:String
+    firstname:String
+    lastname:String
+    job_title:String
+    organization:String
+    address1:String
+    address2:String
+    city:String
+    state:String
+    zipcode:String
+    country:String
+    phone:String
+    fax:String
+  }
+  type domain @key(fields: "id") {
+    id: ID
+    name: String
+    account_id:Int
+    address_id:Int
+    domain_id:Int
+    domain_expires:String
+    whoisguard:Int
+    autorenew:Int
+    privacy:Int
+    notes:String
+    status:String
+  }
+  type buydomain @key(fields: "id") {
+    id:Int
+    name:String
+    notes:String
+  }
+  
+  type account @key(fields:"id"){
+    id:ID
+    email:String
+    username:String
+    api_key:String
+    api_user:String
+    currency:String
+    balance:String
+    notes:String
+    user_id:Int
+  }
+   type User @key(fields: "id") {
+    id: ID!
+    name: String
+    username: String
+    domain_id:Int
+  }
+  type registrar @key(fields: "id"){ 
+    id:Int
+    name:String
+    url:String
+  }
+  type availableDomain{
+    available:String
+    definitive:String
+    domain:String
+  }
+  extend type User @key(fields: "id") {
+    accounts:[account]
+    domains(account:Int):[domain]
+    domain(domain:Int):domain
+    account(account:Int):account
+  }
+  extend type domain @key(fields: "id"){
+    user: User
+  }
